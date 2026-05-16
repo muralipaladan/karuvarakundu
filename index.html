@@ -41,65 +41,74 @@
             margin: 0;
         }
         
-        /* Floating Toolbar design for premium Mobile Capability */
+        /* Premium Glassmorphism Floating Toolbar */
         .floating-toolbar {
             position: fixed;
-            bottom: 25px;
+            bottom: 30px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(255, 255, 255, 0.92);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+            /* Attractive Dark Gradient with transparency */
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.85) 0%, rgba(30, 27, 75, 0.85) 100%);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
             padding: 12px 22px;
-            border-radius: 35px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.18);
+            border-radius: 40px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.15);
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 18px; /* Safe finger tap distance between icons */
+            gap: 16px; 
             z-index: 2000;
-            max-width: 92%;
+            max-width: 95%;
             overflow-x: auto;
-            border: 1px solid rgba(0,0,0,0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             scrollbar-width: none;
         }
         .floating-toolbar::-webkit-scrollbar {
             display: none;
         }
         .tool-btn {
-            background: #ffffff;
-            border: none;
-            color: #333333;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #e2e8f0;
             border-radius: 50%;
-            width: 48px; /* Standard touch target size */
-            height: 48px;
-            font-size: 1.25rem;
+            width: 50px; 
+            height: 50px;
+            font-size: 1.3rem;
             cursor: pointer;
             display: flex;
             justify-content: center;
             align-items: center;
-            box-shadow: 0 3px 8px rgba(0,0,0,0.08);
-            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             flex-shrink: 0;
         }
+        .tool-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
         .tool-btn:active, .tool-btn.active {
-            background: #007bff;
+            /* Vibrant Blue Gradient for Active state */
+            background: linear-gradient(135deg, #00c6ff 0%, #0072ff 100%);
             color: #ffffff;
-            transform: scale(1.12);
-            box-shadow: 0 5px 15px rgba(0, 123, 255, 0.35);
+            border-color: transparent;
+            transform: scale(1.12) translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 114, 255, 0.4);
         }
         #kml-upload {
             display: none;
         }
         /* Prevention of UI overlaps */
         .ol-attribution, .ol-scale-line {
-            bottom: 95px !important;
+            bottom: 105px !important;
         }
 
-        /* Popup-ile font size koottan ulla CSS */
+        /* Popup styling */
         .ol-popup {
             font-size: 16px !important;
             line-height: 1.4;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
         }
         #popup-content {
             font-size: 15px !important;
