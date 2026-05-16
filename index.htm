@@ -8,7 +8,6 @@
         <meta name="apple-mobile-web-app-capable" content="yes">
         <link rel="stylesheet" href="./resources/ol.css">
         <link rel="stylesheet" href="resources/fontawesome-all.min.css">
-        <link href="resources/photon-geocoder-autocomplete.min.css" rel="stylesheet">
         <link rel="stylesheet" href="./resources/ol-layerswitcher.css">
         <link rel="stylesheet" href="./resources/qgis2web.css">
         
@@ -20,27 +19,35 @@
             margin: 0;
             font-family: Arial, sans-serif;
             background-color: #ffffff;
+            overflow: hidden;
         }
 
-        /* Mobile Optimization */
+        /* Bottom Tools Panel Layout */
         .custom-panel {
             position: absolute;
-            top: 75px;
-            right: 12px;
+            bottom: 25px;
+            left: 50%;
+            transform: translateX(-50%);
             z-index: 9999;
             display: flex;
-            flex-direction: column;
-            gap: 12px;
+            flex-direction: row; /* ഹൊറിസോണ്ടൽ ലേഔട്ട് */
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px;
+            border-radius: 16px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.25);
+            border: 1px solid rgba(229, 18, 201, 0.3);
+            width: max-content;
+            max-width: 95vw;
         }
 
         .custom-btn {
             background: #ffffff;
             border: 2px solid #e512c9;
             cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.25);
-            width: 52px !important;
-            height: 52px !important;
-            font-size: 24px !important;
+            width: 50px !important;
+            height: 50px !important;
+            font-size: 22px !important;
             border-radius: 12px !important;
             display: flex;
             align-items: center;
@@ -50,33 +57,20 @@
 
         .custom-btn:active {
             background-color: #fce7f9;
-            transform: scale(0.95);
+            transform: scale(0.9);
         }
 
-        #surveySearch {
-            position: absolute;
-            top: 12px;
-            left: 12px;
-            right: 12px;
-            z-index: 9999;
-            padding: 14px;
-            border-radius: 12px;
-            border: 2px solid #e512c9;
-            font-size: 18px !important; /* വലിയ അക്ഷരങ്ങൾ മൊബൈലിനായി */
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-            box-sizing: border-box;
-        }
-
+        /* Layer Info Pop-up window */
         #layerInfo {
             position: absolute;
-            bottom: 20px;
+            top: 75px;
             left: 12px;
             right: 12px;
             z-index: 9999;
             background: rgba(255, 255, 255, 0.95);
             padding: 16px;
             border-radius: 14px;
-            max-height: 40vh;
+            max-height: 35vh;
             overflow-y: auto;
             border: 2px solid #e512c9;
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
@@ -93,19 +87,23 @@
             font-size: 18px;
         }
 
-        /* QGIS OpenLayers controls adjustments */
+        /* QGIS OpenLayers Default Controls Configuration */
         .ol-control button {
             background-color: #ffffff !important;
             color: #e512c9 !important;
             border-radius: 8px !important;
-            width: 44px !important;
-            height: 44px !important;
+            width: 42px !important;
+            height: 42px !important;
             font-size: 20px !important;
         }
+        
+        /* Zoom Control Top Left */
         .ol-zoom {
-            top: 75px !important;
+            top: 12px !important;
             left: 12px !important;
         }
+        
+        /* Layer Switcher - Top Right Floating */
         .layer-switcher {
             top: 12px !important;
             right: 12px !important;
@@ -113,12 +111,12 @@
         .layer-switcher button {
             width: 52px !important;
             height: 52px !important;
-            background-size: 30px 30px !important;
+            background-size: 28px 28px !important;
             border: 2px solid #e512c9 !important;
             border-radius: 12px !important;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
         }
         
-        /* Active button state */
         .btn-active {
             background-color: #e512c9 !important;
             color: white !important;
@@ -126,8 +124,11 @@
         </style>
     </head>
     <body>
-        
-        <input type="text" id="surveySearch" placeholder="🔍 സർവേ നമ്പർ തിരയുക...">
+
+        <div id="layerInfo">
+            <span class="info-close" onclick="document.getElementById('layerInfo').style.display='none'">✕</span>
+            <div id="layerInfoContent"></div>
+        </div>
 
         <div class="custom-panel">
             <button class="custom-btn" id="gpsBtn" title="Live GPS">📍</button>
@@ -138,11 +139,6 @@
         </div>
 
         <input type="file" id="fileInput" accept=".kml,.geojson,.json" style="display:none">
-
-        <div id="layerInfo">
-            <span class="info-close" onclick="document.getElementById('layerInfo').style.display='none'">✕</span>
-            <div id="layerInfoContent"></div>
-        </div>
 
         <div id="map">
             <div id="popup" class="ol-popup">
@@ -159,7 +155,6 @@
         <script src="./resources/functions.js"></script>
         <script src="./resources/ol.js"></script>
         <script src="./resources/ol-layerswitcher.js"></script>
-        <script src="resources/photon-geocoder-autocomplete.min.js"></script>
         <script src="resources/olms.js"></script>
         <script src="layers/VillageBoundary_3.js"></script>
         <script src="layers/Surveyline_4.js"></script>
@@ -171,7 +166,7 @@
         <script src="https://cdn.jsdelivr.net/npm/@tmcw/togeojson@5.8.1/dist/togeojson.umd.js"></script>
 
 <script>
-// 1. ലെയർ ഹൈഡ്/അൺഹൈഡ് ചെയ്യാനുള്ള ലെയർ സ്വിച്ചർ സെറ്റപ്പ്
+// 1. Layer Switcher സെറ്റപ്പ് (Top Right Floating)
 var layerSwitcher = new ol.control.LayerSwitcher({
     activationMode: 'click',
     tipLabel: 'Layers',
@@ -179,7 +174,7 @@ var layerSwitcher = new ol.control.LayerSwitcher({
 });
 map.addControl(layerSwitcher);
 
-// 2. ലൈവ് ജി.പി.എസ് (Live GPS Tracking)
+// 2. Live GPS Tracking
 let gpsEnabled = false;
 let watchId = null;
 let gpsLayer = null;
@@ -210,7 +205,7 @@ document.getElementById('gpsBtn').onclick = function(){
                 map.addLayer(gpsLayer);
                 map.getView().animate({ center: coords, zoom: 19, duration: 500 });
             }, function(err){
-                alert("GPS പ്രവർത്തിക്കുന്നില്ല. Location Permission അനുവദിക്കുക.");
+                alert("Location Permission അനുവദിക്കുക.");
                 btn.classList.remove('btn-active');
                 gpsEnabled = false;
             }, { enableHighAccuracy: true });
@@ -223,15 +218,15 @@ document.getElementById('gpsBtn').onclick = function(){
     }
 };
 
-// 3. ഗൂഗിൾ മാപ്പ് ഡയറക്ഷൻ (Direction)
+// 3. Google Maps Direction
 let directionMode = false;
 document.getElementById('directionBtn').onclick = function(){
     directionMode = !directionMode;
     this.classList.toggle('btn-active', directionMode);
-    if(directionMode) alert('മാപ്പിൽ പോവേണ്ട സ്ഥലത്ത് ക്ലിക്ക് ചെയ്യുക, ഗൂഗിൾ മാപ്പ് ഓപ്പൺ ആകുന്നതാണ്.');
+    if(directionMode) alert('മാപ്പിൽ പോവേണ്ട സ്ഥലത്ത് ക്ലിക്ക് ചെയ്യുക.');
 };
 
-// 4. നോട്ട്സ് എഴുതി വെക്കാനുള്ള സിസ്റ്റം
+// 4. Notes Adding System
 let noteMode = false;
 let notesLayer = new ol.layer.Vector({ source: new ol.source.Vector() });
 map.addLayer(notesLayer);
@@ -239,10 +234,10 @@ map.addLayer(notesLayer);
 document.getElementById('noteBtn').onclick = function(){
     noteMode = !noteMode;
     this.classList.toggle('btn-active', noteMode);
-    if(noteMode) alert('മാപ്പിൽ നോട്ട് ചേർക്കേണ്ട സ്ഥലത്ത് ക്ലിക്ക് ചെയ്യുക.');
+    if(noteMode) alert('നോട്ട് ചേർക്കേണ്ട സ്ഥലത്ത് ക്ലിക്ക് ചെയ്യുക.');
 };
 
-// 5. കെ.എം.എൽ അപ്‌ലോഡ് (KML Upload)
+// 5. KML/GeoJSON Upload
 document.getElementById('uploadBtn').onclick = function(){
     document.getElementById('fileInput').click();
 };
@@ -267,13 +262,13 @@ document.getElementById('fileInput').addEventListener('change', function(e){
             let layer = new ol.layer.Vector({ source: source });
             map.addLayer(layer);
             map.getView().fit(source.getExtent(), { padding: [50, 50, 50, 50], duration: 1000 });
-            alert('ലെയർ വിജയകരമായി അപ്‌ലോഡ് ചെയ്തു.');
+            alert('ലെയർ അപ്‌ലോഡ് ചെയ്തു.');
         }
     };
     reader.readAsText(file);
 });
 
-// 6. ഡൗൺലോഡ് (Download Location)
+// 6. Download Location
 document.getElementById('downloadBtn').onclick = function(){
     let center = ol.proj.toLonLat(map.getView().getCenter());
     let geojson = {
@@ -291,7 +286,7 @@ document.getElementById('downloadBtn').onclick = function(){
     a.click();
 };
 
-// 7. വിസ്തീർണ്ണവും നീളവും കണക്കാക്കാനുള്ള ഫങ്ഷനുകൾ (Line & Polygon Measurement)
+// 7. Area & Length Calculations
 function formatLength(line) {
     let length = ol.sphere.getLength(line);
     return (length > 100) ? (length / 1000).toFixed(2) + ' km' : length.toFixed(2) + ' meter';
@@ -299,16 +294,15 @@ function formatLength(line) {
 
 function formatArea(polygon) {
     let area = ol.sphere.getArea(polygon);
-    let cent = area / 40.468564224; // 1 സെന്റ് = 40.46 ചതുരശ്ര മീറ്റർ
+    let cent = area / 40.468564224;
     if (cent >= 100) {
         return (cent / 100).toFixed(2) + ' Acre (' + cent.toFixed(1) + ' Cent)';
     }
     return cent.toFixed(2) + ' Cent';
 }
 
-// മാപ്പിൽ തൊടുമ്പോൾ വിവരങ്ങളും അളവുകളും കാണിക്കാൻ
+// ക്ലിക്ക് ചെയ്യുമ്പോൾ ഉള്ള പ്രവർത്തനങ്ങൾ
 map.on('singleclick', function(evt){
-    // Direction Mode ഓൺ ആണെങ്കിൽ
     if(directionMode){
         let coord = ol.proj.toLonLat(evt.coordinate);
         let url = 'https://www.google.com/maps/dir/?api=1&destination=' + coord[1] + ',' + coord[0];
@@ -318,9 +312,8 @@ map.on('singleclick', function(evt){
         return;
     }
 
-    // Note Mode ഓൺ ആണെങ്കിൽ
     if(noteMode){
-        let noteText = prompt("ഈ സ്ഥലത്ത് ചേർക്കേണ്ട നോട്ട് എഴുതുക:");
+        let noteText = prompt("നോട്ട് എഴുതുക:");
         if(noteText){
             let f = new ol.Feature({ geometry: new ol.geom.Point(evt.coordinate) });
             f.setStyle(new ol.style.Style({
@@ -334,7 +327,6 @@ map.on('singleclick', function(evt){
         return;
     }
 
-    // സാധാരണ ക്ലിക്ക് ചെയ്താൽ സർവേ ഡാറ്റയും അളവും കാണിക്കും
     let info = '';
     map.forEachFeatureAtPixel(evt.pixel, function(feature){
         let props = feature.getProperties();
@@ -342,14 +334,12 @@ map.on('singleclick', function(evt){
         
         info += "<div style='border-bottom:1px solid #ccc; padding-bottom:5px; margin-bottom:5px;'>";
         
-        // അളവുകൾ കണ്ടെത്തുന്നു
         if (geom instanceof ol.geom.Polygon) {
             info += '<b>📐 അളവ് (Area):</b> ' + formatArea(geom) + '<br>';
         } else if (geom instanceof ol.geom.LineString) {
             info += '<b>📏 നീളം (Length):</b> ' + formatLength(geom) + '<br>';
         }
 
-        // സർവേ നമ്പറും മറ്റ് വിവരങ്ങളും
         for(let key in props){
             if(key !== 'geometry' && key !== 'boundedBy'){
                 info += '<b>' + key + ':</b> ' + props[key] + '<br>';
@@ -361,45 +351,6 @@ map.on('singleclick', function(evt){
     if(info !== ''){
         document.getElementById('layerInfo').style.display = 'block';
         document.getElementById('layerInfoContent').innerHTML = info;
-    }
-});
-
-// സർവേ നമ്പർ സെർച്ച് ചെയ്യുമ്പോൾ മൊബൈലിൽ വ്യക്തമായി കാണാൻ (Zoom To Fit)
-document.getElementById('surveySearch').addEventListener('keypress', function(e){
-    if(e.key === 'Enter'){
-        let value = this.value.toLowerCase().trim();
-        let found = false;
-        let info = '';
-
-        map.getLayers().forEach(function(layer){
-            if(layer instanceof ol.layer.Vector){
-                layer.getSource().getFeatures().forEach(function(feature){
-                    let props = feature.getProperties();
-                    for(let key in props){
-                        if(String(props[key]).toLowerCase() === value || String(props[key]).toLowerCase().includes(value)){
-                            let geom = feature.getGeometry();
-                            map.getView().fit(geom.getExtent(), { maxZoom: 20, duration: 1000 });
-                            found = true;
-                            
-                            info += '<h3>🔍 സെർച്ച് ഫലം</h3>';
-                            if (geom instanceof ol.geom.Polygon) info += '<b>📐 അളവ്:</b> ' + formatArea(geom) + '<br>';
-                            for(let k in props){
-                                if(k !== 'geometry') info += '<b>' + k + ':</b> ' + props[k] + '<br>';
-                            }
-                            return;
-                        }
-                    }
-                });
-            }
-        });
-
-        if(found){
-            document.getElementById('layerInfo').style.display = 'block';
-            document.getElementById('layerInfoContent').innerHTML = info;
-            this.blur(); // കീബോർഡ് ഹൈഡ് ചെയ്യാൻ
-        } else {
-            alert('ഈ സർവേ നമ്പർ കണ്ടെത്താനായില്ല!');
-        }
     }
 });
 </script>
