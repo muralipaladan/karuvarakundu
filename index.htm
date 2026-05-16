@@ -11,375 +11,397 @@
         <link href="resources/photon-geocoder-autocomplete.min.css" rel="stylesheet">
         <link rel="stylesheet" href="./resources/ol-layerswitcher.css">
         <link rel="stylesheet" href="./resources/qgis2web.css">
-        <style>
-        html, body {
-            background-color: #ffffff;
-        }
-        .ol-control > * {
-            background-color: #f8f8f8!important;
-            color: #e512c9!important;
-            border-radius: 0px;
-        }
-        .ol-attribution a, .gcd-gl-input::placeholder, .search-layer-input-search::placeholder {
-            color: #e512c9!important;
-        }
-        .search-layer-input-search {
-            background-color: #f8f8f8!important;
-        }
-        .ol-control > *:focus, .ol-control >*:hover {
-            background-color: rgba(248, 248, 248, 0.7)!important;
-        } 
-        .ol-control {
-            background-color: rgba(255,255,255,.4) !important;
-            padding: 2px !important;
-        } 
-        </style>
-
+        
         <style>
         html, body, #map {
             width: 100%;
             height: 100%;
             padding: 0;
             margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #ffffff;
+        }
+
+        /* Mobile Optimization */
+        .custom-panel {
+            position: absolute;
+            top: 75px;
+            right: 12px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .custom-btn {
+            background: #ffffff;
+            border: 2px solid #e512c9;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+            width: 52px !important;
+            height: 52px !important;
+            font-size: 24px !important;
+            border-radius: 12px !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .custom-btn:active {
+            background-color: #fce7f9;
+            transform: scale(0.95);
+        }
+
+        #surveySearch {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            right: 12px;
+            z-index: 9999;
+            padding: 14px;
+            border-radius: 12px;
+            border: 2px solid #e512c9;
+            font-size: 18px !important; /* വലിയ അക്ഷരങ്ങൾ മൊബൈലിനായി */
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            box-sizing: border-box;
+        }
+
+        #layerInfo {
+            position: absolute;
+            bottom: 20px;
+            left: 12px;
+            right: 12px;
+            z-index: 9999;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 16px;
+            border-radius: 14px;
+            max-height: 40vh;
+            overflow-y: auto;
+            border: 2px solid #e512c9;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            display: none;
+            font-size: 15px;
+            line-height: 1.5;
+        }
+
+        .info-close {
+            float: right;
+            color: red;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        /* QGIS OpenLayers controls adjustments */
+        .ol-control button {
+            background-color: #ffffff !important;
+            color: #e512c9 !important;
+            border-radius: 8px !important;
+            width: 44px !important;
+            height: 44px !important;
+            font-size: 20px !important;
+        }
+        .ol-zoom {
+            top: 75px !important;
+            left: 12px !important;
+        }
+        .layer-switcher {
+            top: 12px !important;
+            right: 12px !important;
+        }
+        .layer-switcher button {
+            width: 52px !important;
+            height: 52px !important;
+            background-size: 30px 30px !important;
+            border: 2px solid #e512c9 !important;
+            border-radius: 12px !important;
+        }
+        
+        /* Active button state */
+        .btn-active {
+            background-color: #e512c9 !important;
+            color: white !important;
         }
         </style>
-        <title></title>
-    
-<style>
-/* Mobile Friendly */
-.ol-control button,
-.layer-switcher button,
-.custom-btn {
-    width: 52px !important;
-    height: 52px !important;
-    font-size: 22px !important;
-    border-radius: 10px !important;
-}
-
-.custom-panel {
-    position:absolute;
-    top:10px;
-    right:10px;
-    z-index:9999;
-    display:flex;
-    flex-direction:column;
-    gap:10px;
-}
-
-.custom-btn {
-    background:#fff;
-    border:1px solid #999;
-    cursor:pointer;
-    box-shadow:0 2px 6px rgba(0,0,0,0.3);
-}
-
-#surveySearch {
-    position:absolute;
-    top:10px;
-    left:70px;
-    z-index:9999;
-    width:220px;
-    padding:12px;
-    border-radius:10px;
-    border:1px solid #999;
-    font-size:16px;
-}
-
-#layerInfo {
-    position:absolute;
-    bottom:10px;
-    left:10px;
-    z-index:9999;
-    background:#fff;
-    padding:10px;
-    border-radius:10px;
-    max-width:250px;
-    display:none;
-}
-</style>
-
-</head>
+    </head>
     <body>
         
-<input type="text" id="surveySearch" placeholder="Search Survey Number">
+        <input type="text" id="surveySearch" placeholder="🔍 സർവേ നമ്പർ തിരയുക...">
 
-<div class="custom-panel">
-<button class="custom-btn" id="gpsBtn">📍</button>
-<button class="custom-btn" id="directionBtn">🧭</button>
-<button class="custom-btn" id="uploadBtn">⬆</button>
-<button class="custom-btn" id="downloadBtn">⬇</button>
-<button class="custom-btn" id="toggleToolsBtn">🛠</button>
-</div>
+        <div class="custom-panel">
+            <button class="custom-btn" id="gpsBtn" title="Live GPS">📍</button>
+            <button class="custom-btn" id="directionBtn" title="Get Direction">🧭</button>
+            <button class="custom-btn" id="noteBtn" title="Add Note">📝</button>
+            <button class="custom-btn" id="uploadBtn" title="Upload KML/GeoJSON">⬆️</button>
+            <button class="custom-btn" id="downloadBtn" title="Download Location">⬇️</button>
+        </div>
 
-<input type="file" id="fileInput" accept=".kml,.geojson,.json" style="display:none">
+        <input type="file" id="fileInput" accept=".kml,.geojson,.json" style="display:none">
 
-<div id="layerInfo"></div>
+        <div id="layerInfo">
+            <span class="info-close" onclick="document.getElementById('layerInfo').style.display='none'">✕</span>
+            <div id="layerInfoContent"></div>
+        </div>
 
-<div id="map">
+        <div id="map">
             <div id="popup" class="ol-popup">
                 <a href="#" id="popup-closer" class="ol-popup-closer"></a>
                 <div id="popup-content"></div>
             </div>
         </div>
+
         <script src="resources/qgis2web_expressions.js"></script>
-<script src="resources/proj4.js"></script>
-        <script>proj4.defs('EPSG:3857','+proj=merc +a=6378137 +b=6378137 +lat_ts=0 +lon_0=0 +x_0=0 +y_0=0 +k=1 +units=m +nadgrids=@null +wktext +no_defs');</script>
+        <script src="resources/proj4.js"></script>
+        <script>
+            proj4.defs('EPSG:3857','+proj=merc +a=6378137 +b=6378137 +lat_ts=0 +lon_0=0 +x_0=0 +y_0=0 +k=1 +units=m +nadgrids=@null +wktext +no_defs');
+        </script>
         <script src="./resources/functions.js"></script>
         <script src="./resources/ol.js"></script>
         <script src="./resources/ol-layerswitcher.js"></script>
         <script src="resources/photon-geocoder-autocomplete.min.js"></script>
         <script src="resources/olms.js"></script>
-        <script src="layers/VillageBoundary_3.js"></script><script src="layers/Surveyline_4.js"></script>
-        <script src="styles/VillageBoundary_3_style.js"></script><script src="styles/Surveyline_4_style.js"></script>
+        <script src="layers/VillageBoundary_3.js"></script>
+        <script src="layers/Surveyline_4.js"></script>
+        <script src="styles/VillageBoundary_3_style.js"></script>
+        <script src="styles/Surveyline_4_style.js"></script>
         <script src="./layers/layers.js" type="text/javascript"></script> 
         <script src="./resources/Autolinker.min.js"></script>
         <script src="./resources/qgis2web.js"></script>        
-    
-<script src="https://cdn.jsdelivr.net/npm/@tmcw/togeojson@5.8.1/dist/togeojson.umd.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@tmcw/togeojson@5.8.1/dist/togeojson.umd.js"></script>
 
 <script>
+// 1. ലെയർ ഹൈഡ്/അൺഹൈഡ് ചെയ്യാനുള്ള ലെയർ സ്വിച്ചർ സെറ്റപ്പ്
+var layerSwitcher = new ol.control.LayerSwitcher({
+    activationMode: 'click',
+    tipLabel: 'Layers',
+    groupSelectStyle: 'children'
+});
+map.addControl(layerSwitcher);
 
+// 2. ലൈവ് ജി.പി.എസ് (Live GPS Tracking)
 let gpsEnabled = false;
+let watchId = null;
 let gpsLayer = null;
 
 document.getElementById('gpsBtn').onclick = function(){
-
+    let btn = this;
     if(!gpsEnabled){
+        if (navigator.geolocation) {
+            btn.classList.add('btn-active');
+            gpsEnabled = true;
+            watchId = navigator.geolocation.watchPosition(function(pos){
+                let coords = ol.proj.fromLonLat([pos.coords.longitude, pos.coords.latitude]);
+                
+                if(gpsLayer){ map.removeLayer(gpsLayer); }
 
-        navigator.geolocation.watchPosition(function(pos){
-
-            let coords = ol.proj.fromLonLat([
-                pos.coords.longitude,
-                pos.coords.latitude
-            ]);
-
-            if(gpsLayer){
-                map.removeLayer(gpsLayer);
-            }
-
-            gpsLayer = new ol.layer.Vector({
-                source:new ol.source.Vector({
-                    features:[
-                        new ol.Feature({
-                            geometry:new ol.geom.Point(coords)
+                gpsLayer = new ol.layer.Vector({
+                    source: new ol.source.Vector({
+                        features: [new ol.Feature({ geometry: new ol.geom.Point(coords) })]
+                    }),
+                    style: new ol.style.Style({
+                        image: new ol.style.Circle({
+                            radius: 9,
+                            fill: new ol.style.Fill({color: '#127be5'}),
+                            stroke: new ol.style.Stroke({color: '#fff', width: 3})
                         })
-                    ]
-                })
-            });
-
-            map.addLayer(gpsLayer);
-
-            map.getView().animate({
-                center:coords,
-                zoom:18
-            });
-
-        });
-
-        gpsEnabled = true;
-
-    } else {
-
-        if(gpsLayer){
-            map.removeLayer(gpsLayer);
+                    })
+                });
+                map.addLayer(gpsLayer);
+                map.getView().animate({ center: coords, zoom: 19, duration: 500 });
+            }, function(err){
+                alert("GPS പ്രവർത്തിക്കുന്നില്ല. Location Permission അനുവദിക്കുക.");
+                btn.classList.remove('btn-active');
+                gpsEnabled = false;
+            }, { enableHighAccuracy: true });
         }
-
+    } else {
+        navigator.geolocation.clearWatch(watchId);
+        if(gpsLayer){ map.removeLayer(gpsLayer); }
+        btn.classList.remove('btn-active');
         gpsEnabled = false;
     }
 };
 
+// 3. ഗൂഗിൾ മാപ്പ് ഡയറക്ഷൻ (Direction)
+let directionMode = false;
 document.getElementById('directionBtn').onclick = function(){
-
-    map.once('click', function(evt){
-
-        let coord = ol.proj.toLonLat(evt.coordinate);
-
-        let url =
-            'https://www.google.com/maps/dir/?api=1&destination=' +
-            coord[1] + ',' + coord[0];
-
-        window.open(url, '_blank');
-    });
-
-    alert('Click map for direction');
+    directionMode = !directionMode;
+    this.classList.toggle('btn-active', directionMode);
+    if(directionMode) alert('മാപ്പിൽ പോവേണ്ട സ്ഥലത്ത് ക്ലിക്ക് ചെയ്യുക, ഗൂഗിൾ മാപ്പ് ഓപ്പൺ ആകുന്നതാണ്.');
 };
 
+// 4. നോട്ട്സ് എഴുതി വെക്കാനുള്ള സിസ്റ്റം
+let noteMode = false;
+let notesLayer = new ol.layer.Vector({ source: new ol.source.Vector() });
+map.addLayer(notesLayer);
+
+document.getElementById('noteBtn').onclick = function(){
+    noteMode = !noteMode;
+    this.classList.toggle('btn-active', noteMode);
+    if(noteMode) alert('മാപ്പിൽ നോട്ട് ചേർക്കേണ്ട സ്ഥലത്ത് ക്ലിക്ക് ചെയ്യുക.');
+};
+
+// 5. കെ.എം.എൽ അപ്‌ലോഡ് (KML Upload)
 document.getElementById('uploadBtn').onclick = function(){
     document.getElementById('fileInput').click();
 };
 
 document.getElementById('fileInput').addEventListener('change', function(e){
-
     let file = e.target.files[0];
-
     if(!file) return;
-
     let reader = new FileReader();
-
     reader.onload = function(evt){
-
         let text = evt.target.result;
-
+        let features;
         if(file.name.endsWith('.geojson') || file.name.endsWith('.json')){
-
-            let features = new ol.format.GeoJSON().readFeatures(text, {
-                featureProjection:'EPSG:3857'
-            });
-
-            let source = new ol.source.Vector({
-                features:features
-            });
-
-            let layer = new ol.layer.Vector({
-                source:source
-            });
-
-            map.addLayer(layer);
-
-            map.getView().fit(source.getExtent());
-        }
-
-        if(file.name.endsWith('.kml')){
-
+            features = new ol.format.GeoJSON().readFeatures(text, { featureProjection: 'EPSG:3857' });
+        } else if(file.name.endsWith('.kml')){
             let parser = new DOMParser();
-
             let kml = parser.parseFromString(text, 'text/xml');
-
             let geojson = toGeoJSON.kml(kml);
-
-            let features = new ol.format.GeoJSON().readFeatures(geojson, {
-                featureProjection:'EPSG:3857'
-            });
-
-            let source = new ol.source.Vector({
-                features:features
-            });
-
-            let layer = new ol.layer.Vector({
-                source:source
-            });
-
+            features = new ol.format.GeoJSON().readFeatures(geojson, { featureProjection: 'EPSG:3857' });
+        }
+        if(features && features.length > 0){
+            let source = new ol.source.Vector({ features: features });
+            let layer = new ol.layer.Vector({ source: source });
             map.addLayer(layer);
-
-            map.getView().fit(source.getExtent());
+            map.getView().fit(source.getExtent(), { padding: [50, 50, 50, 50], duration: 1000 });
+            alert('ലെയർ വിജയകരമായി അപ്‌ലോഡ് ചെയ്തു.');
         }
     };
-
     reader.readAsText(file);
 });
 
+// 6. ഡൗൺലോഡ് (Download Location)
 document.getElementById('downloadBtn').onclick = function(){
-
     let center = ol.proj.toLonLat(map.getView().getCenter());
-
     let geojson = {
-        type:'FeatureCollection',
-        features:[{
-            type:'Feature',
-            geometry:{
-                type:'Point',
-                coordinates:center
-            },
-            properties:{
-                name:'Map Center'
-            }
+        type: 'FeatureCollection',
+        features: [{
+            type: 'Feature',
+            geometry: { type: 'Point', coordinates: center },
+            properties: { name: 'Saved Mobile Location' }
         }]
     };
-
-    let data =
-        'data:text/json;charset=utf-8,' +
-        encodeURIComponent(JSON.stringify(geojson));
-
+    let data = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(geojson));
     let a = document.createElement('a');
-
     a.href = data;
     a.download = 'map_location.geojson';
-
     a.click();
 };
 
-let visible = true;
+// 7. വിസ്തീർണ്ണവും നീളവും കണക്കാക്കാനുള്ള ഫങ്ഷനുകൾ (Line & Polygon Measurement)
+function formatLength(line) {
+    let length = ol.sphere.getLength(line);
+    return (length > 100) ? (length / 1000).toFixed(2) + ' km' : length.toFixed(2) + ' meter';
+}
 
-document.getElementById('toggleToolsBtn').onclick = function(){
+function formatArea(polygon) {
+    let area = ol.sphere.getArea(polygon);
+    let cent = area / 40.468564224; // 1 സെന്റ് = 40.46 ചതുരശ്ര മീറ്റർ
+    if (cent >= 100) {
+        return (cent / 100).toFixed(2) + ' Acre (' + cent.toFixed(1) + ' Cent)';
+    }
+    return cent.toFixed(2) + ' Cent';
+}
 
-    let controls = document.querySelectorAll('.ol-control');
+// മാപ്പിൽ തൊടുമ്പോൾ വിവരങ്ങളും അളവുകളും കാണിക്കാൻ
+map.on('singleclick', function(evt){
+    // Direction Mode ഓൺ ആണെങ്കിൽ
+    if(directionMode){
+        let coord = ol.proj.toLonLat(evt.coordinate);
+        let url = 'https://www.google.com/maps/dir/?api=1&destination=' + coord[1] + ',' + coord[0];
+        window.open(url, '_blank');
+        directionMode = false;
+        document.getElementById('directionBtn').classList.remove('btn-active');
+        return;
+    }
 
-    controls.forEach(function(ctrl){
+    // Note Mode ഓൺ ആണെങ്കിൽ
+    if(noteMode){
+        let noteText = prompt("ഈ സ്ഥലത്ത് ചേർക്കേണ്ട നോട്ട് എഴുതുക:");
+        if(noteText){
+            let f = new ol.Feature({ geometry: new ol.geom.Point(evt.coordinate) });
+            f.setStyle(new ol.style.Style({
+                image: new ol.style.Circle({ radius: 6, fill: new ol.style.Fill({color: 'red'}) }),
+                text: new ol.style.Text({ text: noteText, scale: 1.3, offsetY: -15, fill: new ol.style.Fill({color: '#000'}), backgroundFill: new ol.style.Fill({color: '#fff'}) })
+            }));
+            notesLayer.getSource().addFeature(f);
+        }
+        noteMode = false;
+        document.getElementById('noteBtn').classList.remove('btn-active');
+        return;
+    }
 
-        ctrl.style.display = visible ? 'none' : 'block';
+    // സാധാരണ ക്ലിക്ക് ചെയ്താൽ സർവേ ഡാറ്റയും അളവും കാണിക്കും
+    let info = '';
+    map.forEachFeatureAtPixel(evt.pixel, function(feature){
+        let props = feature.getProperties();
+        let geom = feature.getGeometry();
+        
+        info += "<div style='border-bottom:1px solid #ccc; padding-bottom:5px; margin-bottom:5px;'>";
+        
+        // അളവുകൾ കണ്ടെത്തുന്നു
+        if (geom instanceof ol.geom.Polygon) {
+            info += '<b>📐 അളവ് (Area):</b> ' + formatArea(geom) + '<br>';
+        } else if (geom instanceof ol.geom.LineString) {
+            info += '<b>📏 നീളം (Length):</b> ' + formatLength(geom) + '<br>';
+        }
+
+        // സർവേ നമ്പറും മറ്റ് വിവരങ്ങളും
+        for(let key in props){
+            if(key !== 'geometry' && key !== 'boundedBy'){
+                info += '<b>' + key + ':</b> ' + props[key] + '<br>';
+            }
+        }
+        info += "</div>";
     });
 
-    visible = !visible;
-};
+    if(info !== ''){
+        document.getElementById('layerInfo').style.display = 'block';
+        document.getElementById('layerInfoContent').innerHTML = info;
+    }
+});
 
+// സർവേ നമ്പർ സെർച്ച് ചെയ്യുമ്പോൾ മൊബൈലിൽ വ്യക്തമായി കാണാൻ (Zoom To Fit)
 document.getElementById('surveySearch').addEventListener('keypress', function(e){
-
     if(e.key === 'Enter'){
-
-        let value = this.value.toLowerCase();
-
+        let value = this.value.toLowerCase().trim();
         let found = false;
+        let info = '';
 
         map.getLayers().forEach(function(layer){
-
             if(layer instanceof ol.layer.Vector){
-
                 layer.getSource().getFeatures().forEach(function(feature){
-
                     let props = feature.getProperties();
-
                     for(let key in props){
-
-                        if(String(props[key]).toLowerCase().includes(value)){
-
-                            map.getView().fit(
-                                feature.getGeometry().getExtent(),
-                                {maxZoom:20}
-                            );
-
+                        if(String(props[key]).toLowerCase() === value || String(props[key]).toLowerCase().includes(value)){
+                            let geom = feature.getGeometry();
+                            map.getView().fit(geom.getExtent(), { maxZoom: 20, duration: 1000 });
                             found = true;
-
-                            document.getElementById('layerInfo').style.display='block';
-                            document.getElementById('layerInfo').innerHTML =
-                                '<b>Survey Result</b><br>' +
-                                JSON.stringify(props);
-
-                            break;
+                            
+                            info += '<h3>🔍 സെർച്ച് ഫലം</h3>';
+                            if (geom instanceof ol.geom.Polygon) info += '<b>📐 അളവ്:</b> ' + formatArea(geom) + '<br>';
+                            for(let k in props){
+                                if(k !== 'geometry') info += '<b>' + k + ':</b> ' + props[k] + '<br>';
+                            }
+                            return;
                         }
                     }
                 });
             }
         });
 
-        if(!found){
-            alert('Survey Number Not Found');
+        if(found){
+            document.getElementById('layerInfo').style.display = 'block';
+            document.getElementById('layerInfoContent').innerHTML = info;
+            this.blur(); // കീബോർഡ് ഹൈഡ് ചെയ്യാൻ
+        } else {
+            alert('ഈ സർവേ നമ്പർ കണ്ടെത്താനായില്ല!');
         }
     }
 });
-
-map.on('singleclick', function(evt){
-
-    let info = '';
-
-    map.forEachFeatureAtPixel(evt.pixel, function(feature){
-
-        let props = feature.getProperties();
-
-        for(let key in props){
-
-            if(key !== 'geometry'){
-                info += '<b>' + key + ':</b> ' + props[key] + '<br>';
-            }
-        }
-    });
-
-    if(info !== ''){
-        document.getElementById('layerInfo').style.display='block';
-        document.getElementById('layerInfo').innerHTML = info;
-    }
-});
-
 </script>
-
 </body>
 </html>
