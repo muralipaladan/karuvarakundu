@@ -23,48 +23,69 @@
             overflow: hidden;
         }
 
-        /* OpenLayers Standard Controls Styling */
+        /* OpenLayers Standard Controls */
         .ol-control > * {
             background-color: #ffffff !important;
             color: #333333 !important;
             border-radius: 8px !important;
             box-shadow: 0 2px 6px rgba(0,0,0,0.2) !important;
         }
-        .ol-control {
-            background-color: transparent !important;
-            padding: 0 !important;
+        
+        /* Layer Switcher - Fixed on Right Side */
+        .ol-layerswitcher {
+            top: 75px !important;
+            right: 15px !important;
+            left: auto !important;
         }
 
-        /* Search Bar Layout - Top Centered & Floating */
+        /* Toggle Master Button (Top Right) - Screen full aayi kaanan default aayi tools hide cheyyan */
+        .toggle-master-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            z-index: 10000;
+            background: #e512c9;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 14px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            cursor: pointer;
+        }
+
+        /* Search Bar Layout - Centered (Hidden by default) */
         .search-container {
             position: absolute;
             top: 15px;
             left: 50%;
             transform: translateX(-50%);
             z-index: 9999;
-            width: 90%;
-            max-width: 400px;
+            width: 75%;
+            max-width: 320px;
+            display: none; /* Initially hidden */
         }
 
         #surveySearch {
             width: 100%;
-            padding: 14px 20px;
+            padding: 12px 18px;
             border-radius: 25px;
             border: none;
-            font-size: 16px;
+            font-size: 15px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
             outline: none;
             box-sizing: border-box;
             background: #ffffff;
         }
 
-        /* Bottom Control Panel for Mobile Ergonomics */
-        .custom-panel {
+        /* Left Side Control Panel (Hidden by default) */
+        .custom-panel-left {
             position: absolute;
             bottom: 25px;
-            right: 15px;
+            left: 15px;
             z-index: 9999;
-            display: flex;
+            display: none; /* Initially hidden */
             flex-direction: column;
             gap: 12px;
         }
@@ -74,9 +95,9 @@
             border: none;
             cursor: pointer;
             box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-            width: 50px !important;
-            height: 50px !important;
-            font-size: 20px !important;
+            width: 48px !important;
+            height: 48px !important;
+            font-size: 18px !important;
             border-radius: 50% !important;
             display: flex;
             align-items: center;
@@ -89,18 +110,18 @@
             background: #f0f0f0;
         }
 
-        /* Elegant Bottom Sheet for Layer/Survey Info */
+        /* Bottom Info Sheet for Survey/Layer Details */
         #layerInfo {
             position: absolute;
             bottom: 25px;
-            left: 15px;
+            right: 15px;
             z-index: 9998;
             background: #ffffff;
             padding: 15px;
             border-radius: 16px;
-            width: 85%;
-            max-width: 320px;
-            max-height: 250px;
+            width: 80%;
+            max-width: 280px;
+            max-height: 200px;
             overflow-y: auto;
             box-shadow: 0 4px 20px rgba(0,0,0,0.15);
             display: none;
@@ -110,23 +131,22 @@
         #layerInfo h4 {
             margin: 0 0 8px 0;
             color: #333;
-            font-size: 16px;
+            font-size: 15px;
             border-bottom: 2px solid #f0f0f0;
             padding-bottom: 5px;
         }
 
         #layerInfo .info-item {
-            font-size: 14px;
-            margin-bottom: 6px;
+            font-size: 13px;
+            margin-bottom: 5px;
             line-height: 1.4;
             color: #555;
         }
 
-        /* Close button for Info Card */
         .close-card {
             float: right;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 15px;
             color: #999;
         }
         </style>
@@ -134,16 +154,17 @@
     </head>
     <body>
         
-        <div class="search-container">
+        <button class="toggle-master-btn" id="toggleToolsBtn">🛠 Tools</button>
+
+        <div class="search-container" id="searchBarContainer">
             <input type="text" id="surveySearch" placeholder="🔍 Search Survey Number...">
         </div>
 
-        <div class="custom-panel">
+        <div class="custom-panel-left" id="leftToolsPanel">
             <button class="custom-btn" id="gpsBtn" title="My Location">📍</button>
             <button class="custom-btn" id="directionBtn" title="Get Directions">🧭</button>
             <button class="custom-btn" id="uploadBtn" title="Upload File">⬆</button>
             <button class="custom-btn" id="downloadBtn" title="Download Location">⬇</button>
-            <button class="custom-btn" id="toggleToolsBtn" title="Toggle Tools">🛠</button>
         </div>
 
         <input type="file" id="fileInput" accept=".kml,.geojson,.json" style="display:none">
@@ -179,6 +200,37 @@
         <script src="https://cdn.jsdelivr.net/npm/@tmcw/togeojson@5.8.1/dist/togeojson.umd.js"></script>
 
 <script>
+// Moving Layer Switcher explicitly to the Right Side
+map.getControls().forEach(function(control) {
+    if (control instanceof ol.control.LayerSwitcher || (control.constructor && control.constructor.name === 'LayerSwitcher')) {
+        map.removeControl(control);
+    }
+});
+var layerSwitcher = new ol.control.LayerSwitcher({
+    activationMode: 'click',
+    target: null,
+    tipLabel: 'Layers',
+    groupSelectStyle: 'children'
+});
+map.addControl(layerSwitcher);
+
+// Hide/Show Toggle Logic (Default: Hidden for full screen view)
+let toolsVisible = false;
+document.getElementById('toggleToolsBtn').onclick = function(){
+    toolsVisible = !toolsVisible;
+    if(toolsVisible){
+        document.getElementById('leftToolsPanel').style.display = 'flex';
+        document.getElementById('searchBarContainer').style.display = 'block';
+        this.style.background = "#333333";
+        this.innerText = "✕ Close";
+    } else {
+        document.getElementById('leftToolsPanel').style.display = 'none';
+        document.getElementById('searchBarContainer').style.display = 'none';
+        this.style.background = "#e512c9";
+        this.innerText = "🛠 Tools";
+    }
+};
+
 let gpsEnabled = false;
 let gpsLayer = null;
 
@@ -207,7 +259,7 @@ document.getElementById('gpsBtn').onclick = function(){
             map.addLayer(gpsLayer);
             map.getView().animate({
                 center:coords,
-                zoom:18
+                zoom:19
             });
         });
         gpsEnabled = true;
@@ -226,7 +278,7 @@ document.getElementById('gpsBtn').onclick = function(){
 document.getElementById('directionBtn').onclick = function(){
     map.once('click', function(evt){
         let coord = ol.proj.toLonLat(evt.coordinate);
-        let url = 'https://www.google.com/maps/search/?api=1&query=' + coord[1] + ',' + coord[0];
+        let url = 'https://www.google.com/maps/dir/?api=1&destination=' + coord[1] + ',' + coord[0];
         window.open(url, '_blank');
     });
     alert('Click anywhere on the map to get directions to that point.');
@@ -285,16 +337,7 @@ document.getElementById('downloadBtn').onclick = function(){
     a.click();
 };
 
-let visible = true;
-document.getElementById('toggleToolsBtn').onclick = function(){
-    let controls = document.querySelectorAll('.ol-control');
-    controls.forEach(function(ctrl){
-        ctrl.style.display = visible ? 'none' : 'block';
-    });
-    visible = !visible;
-};
-
-// Survey Search Logic
+// Survey Search Logic with High Micro Zoom (maxZoom: 22)
 document.getElementById('surveySearch').addEventListener('keypress', function(e){
     if(e.key === 'Enter'){
         let value = this.value.toLowerCase().trim();
@@ -309,7 +352,7 @@ document.getElementById('surveySearch').addEventListener('keypress', function(e)
                         if(key !== 'geometry' && String(props[key]).toLowerCase().includes(value)){
                             map.getView().fit(
                                 feature.getGeometry().getExtent(),
-                                { maxZoom: 19, duration: 1000 }
+                                { maxZoom: 22, duration: 1000 } // Micro zoom level for small view issue
                             );
                             found = true;
                             showInfoCard('Survey Search Result', props);
@@ -338,7 +381,6 @@ map.on('singleclick', function(evt){
     }
 });
 
-// Function to format and show info nicely
 function showInfoCard(title, properties) {
     let infoHtml = '';
     for(let key in properties){
