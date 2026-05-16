@@ -23,53 +23,39 @@
             overflow: hidden;
         }
 
-        /* OpenLayers Standard Controls */
+        /* OpenLayers Standard Controls Customization */
         .ol-control > * {
             background-color: #ffffff !important;
             color: #333333 !important;
             border-radius: 8px !important;
             box-shadow: 0 2px 6px rgba(0,0,0,0.2) !important;
         }
-        
-        /* Layer Switcher - Fixed on Right Side */
-        .ol-layerswitcher {
-            top: 75px !important;
-            right: 15px !important;
-            left: auto !important;
-        }
 
-        /* Toggle Master Button (Top Right) - Screen full aayi kaanan default aayi tools hide cheyyan */
-        .toggle-master-btn {
+        /* Top Header Container to organize Search, Tools & Layers without overlap */
+        .top-header-container {
             position: absolute;
-            top: 15px;
-            right: 15px;
+            top: 12px;
+            left: 12px;
+            right: 12px;
             z-index: 10000;
-            background: #e512c9;
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 20px;
-            font-weight: bold;
-            font-size: 14px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            pointer-events: none; /* Allows clicking map through empty spaces */
         }
 
-        /* Search Bar Layout - Centered (Hidden by default) */
+        /* Search Container - Width controlled so it never touches the right side controls */
         .search-container {
-            position: absolute;
-            top: 15px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 9999;
-            width: 75%;
-            max-width: 320px;
-            display: none; /* Initially hidden */
+            flex: 1;
+            max-width: calc(100% - 160px); /* Keeps safe space for Layer & Tools button */
+            pointer-events: auto;
+            display: none; /* Hidden by default as per your working time rule */
         }
 
         #surveySearch {
             width: 100%;
-            padding: 12px 18px;
+            padding: 12px 16px;
             border-radius: 25px;
             border: none;
             font-size: 15px;
@@ -79,13 +65,58 @@
             background: #ffffff;
         }
 
-        /* Left Side Control Panel (Hidden by default) */
+        /* Action Controls Group on Top Right */
+        .top-right-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            pointer-events: auto;
+        }
+
+        /* Toggle Master Button styling */
+        .toggle-master-btn {
+            background: #e512c9;
+            color: white;
+            border: none;
+            height: 44px;
+            padding: 0 14px;
+            border-radius: 22px;
+            font-weight: bold;
+            font-size: 14px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap;
+        }
+
+        /* Overriding Layer Switcher Default Position to fit inside top action group cleanly */
+        .ol-layerswitcher {
+            position: static !important;
+        }
+        .ol-layerswitcher button {
+            width: 44px !important;
+            height: 44px !important;
+            background-size: 20px !important;
+            border-radius: 50% !important;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2) !important;
+        }
+        .ol-layerswitcher .panel {
+            position: absolute;
+            top: 65px;
+            right: 12px;
+            max-height: 75vh;
+            overflow-y: auto;
+        }
+
+        /* Left Side Tools Panel (Hidden by default) */
         .custom-panel-left {
             position: absolute;
             bottom: 25px;
             left: 15px;
             z-index: 9999;
-            display: none; /* Initially hidden */
+            display: none; 
             flex-direction: column;
             gap: 12px;
         }
@@ -110,7 +141,7 @@
             background: #f0f0f0;
         }
 
-        /* Bottom Info Sheet for Survey/Layer Details */
+        /* Bottom Sheet Box for Info */
         #layerInfo {
             position: absolute;
             bottom: 25px;
@@ -154,10 +185,14 @@
     </head>
     <body>
         
-        <button class="toggle-master-btn" id="toggleToolsBtn">🛠 Tools</button>
+        <div class="top-header-container">
+            <div class="search-container" id="searchBarContainer">
+                <input type="text" id="surveySearch" placeholder="🔍 Search Survey...">
+            </div>
 
-        <div class="search-container" id="searchBarContainer">
-            <input type="text" id="surveySearch" placeholder="🔍 Search Survey Number...">
+            <div class="top-right-actions">
+                <button class="toggle-master-btn" id="toggleToolsBtn">🛠 Tools</button>
+                <div id="layerSwitcherTarget"></div> </div>
         </div>
 
         <div class="custom-panel-left" id="leftToolsPanel">
@@ -200,7 +235,7 @@
         <script src="https://cdn.jsdelivr.net/npm/@tmcw/togeojson@5.8.1/dist/togeojson.umd.js"></script>
 
 <script>
-// Moving Layer Switcher explicitly to the Right Side
+// Moving Layer Switcher inside our custom top right action container dynamically
 map.getControls().forEach(function(control) {
     if (control instanceof ol.control.LayerSwitcher || (control.constructor && control.constructor.name === 'LayerSwitcher')) {
         map.removeControl(control);
@@ -208,13 +243,13 @@ map.getControls().forEach(function(control) {
 });
 var layerSwitcher = new ol.control.LayerSwitcher({
     activationMode: 'click',
-    target: null,
+    target: document.getElementById('layerSwitcherTarget'),
     tipLabel: 'Layers',
     groupSelectStyle: 'children'
 });
 map.addControl(layerSwitcher);
 
-// Hide/Show Toggle Logic (Default: Hidden for full screen view)
+// Toggle Tools Master Button (Default: Hidden)
 let toolsVisible = false;
 document.getElementById('toggleToolsBtn').onclick = function(){
     toolsVisible = !toolsVisible;
@@ -249,26 +284,19 @@ document.getElementById('gpsBtn').onclick = function(){
             gpsLayer = new ol.layer.Vector({
                 source:new ol.source.Vector({
                     features:[
-                        new ol.Feature({
-                            geometry:new ol.geom.Point(coords)
-                        })
+                        new ol.Feature({ geometry:new ol.geom.Point(coords) })
                     ]
                 })
             });
 
             map.addLayer(gpsLayer);
-            map.getView().animate({
-                center:coords,
-                zoom:19
-            });
+            map.getView().animate({ center:coords, zoom:19 });
         });
         gpsEnabled = true;
         this.style.background = "#e512c9";
         this.style.color = "#fff";
     } else {
-        if(gpsLayer){
-            map.removeLayer(gpsLayer);
-        }
+        if(gpsLayer){ map.removeLayer(gpsLayer); }
         gpsEnabled = false;
         this.style.background = "#ffffff";
         this.style.color = "#333";
@@ -281,7 +309,7 @@ document.getElementById('directionBtn').onclick = function(){
         let url = 'https://www.google.com/maps/dir/?api=1&destination=' + coord[1] + ',' + coord[0];
         window.open(url, '_blank');
     });
-    alert('Click anywhere on the map to get directions to that point.');
+    alert('Click anywhere on the map to get directions.');
 };
 
 document.getElementById('uploadBtn').onclick = function(){
@@ -298,16 +326,12 @@ document.getElementById('fileInput').addEventListener('change', function(e){
         let features;
 
         if(file.name.endsWith('.geojson') || file.name.endsWith('.json')){
-            features = new ol.format.GeoJSON().readFeatures(text, {
-                featureProjection:'EPSG:3857'
-            });
+            features = new ol.format.GeoJSON().readFeatures(text, { featureProjection:'EPSG:3857' });
         } else if(file.name.endsWith('.kml')){
             let parser = new DOMParser();
             let kml = parser.parseFromString(text, 'text/xml');
             let geojson = toGeoJSON.kml(kml);
-            features = new ol.format.GeoJSON().readFeatures(geojson, {
-                featureProjection:'EPSG:3857'
-            });
+            features = new ol.format.GeoJSON().readFeatures(geojson, { featureProjection:'EPSG:3857' });
         }
 
         if(features && features.length > 0) {
@@ -337,7 +361,7 @@ document.getElementById('downloadBtn').onclick = function(){
     a.click();
 };
 
-// Survey Search Logic with High Micro Zoom (maxZoom: 22)
+// Survey Search Logic with High Zoom (maxZoom: 22)
 document.getElementById('surveySearch').addEventListener('keypress', function(e){
     if(e.key === 'Enter'){
         let value = this.value.toLowerCase().trim();
@@ -352,7 +376,7 @@ document.getElementById('surveySearch').addEventListener('keypress', function(e)
                         if(key !== 'geometry' && String(props[key]).toLowerCase().includes(value)){
                             map.getView().fit(
                                 feature.getGeometry().getExtent(),
-                                { maxZoom: 22, duration: 1000 } // Micro zoom level for small view issue
+                                { maxZoom: 22, duration: 1000 }
                             );
                             found = true;
                             showInfoCard('Survey Search Result', props);
@@ -363,22 +387,18 @@ document.getElementById('surveySearch').addEventListener('keypress', function(e)
             }
         });
 
-        if(!found){
-            alert('Survey Number Not Found');
-        }
+        if(!found){ alert('Survey Number Not Found'); }
     }
 });
 
-// Map Click Logic
+// Map Click Info Logic
 map.on('singleclick', function(evt){
     let propsFound = null;
     map.forEachFeatureAtPixel(evt.pixel, function(feature){
         propsFound = feature.getProperties();
     });
 
-    if(propsFound){
-        showInfoCard('Layer Details', propsFound);
-    }
+    if(propsFound){ showInfoCard('Layer Details', propsFound); }
 });
 
 function showInfoCard(title, properties) {
