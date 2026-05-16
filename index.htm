@@ -23,7 +23,7 @@
             overflow: hidden;
         }
 
-        /* OpenLayers Standard Controls Customization */
+        /* OpenLayers default controls clear aakan */
         .ol-control > * {
             background-color: #ffffff !important;
             color: #333333 !important;
@@ -31,8 +31,8 @@
             box-shadow: 0 2px 6px rgba(0,0,0,0.2) !important;
         }
 
-        /* Top Header Container to organize Search, Tools & Layers without overlap */
-        .top-header-container {
+        /* Top Header Container to manage Search & Layer button flawlessly */
+        .top-header-layout {
             position: absolute;
             top: 12px;
             left: 12px;
@@ -41,165 +41,143 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 10px;
-            pointer-events: none; /* Allows clicking map through empty spaces */
+            gap: 12px;
+            pointer-events: none;
         }
 
-        /* Search Container - Width controlled so it never touches the right side controls */
+        /* Search Container - Static on Top Left */
         .search-container {
             flex: 1;
-            max-width: calc(100% - 160px); /* Keeps safe space for Layer & Tools button */
+            max-width: calc(100% - 70px); /* Leaves explicit separate space for layer button */
             pointer-events: auto;
-            display: none; /* Hidden by default as per your working time rule */
         }
 
         #surveySearch {
             width: 100%;
             padding: 12px 16px;
             border-radius: 25px;
-            border: none;
+            border: 1px solid #ccc;
             font-size: 15px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
             outline: none;
             box-sizing: border-box;
             background: #ffffff;
         }
 
-        /* Action Controls Group on Top Right */
-        .top-right-actions {
-            display: flex;
-            align-items: center;
-            gap: 8px;
+        /* Layer Switcher Container Target on Top Right */
+        .layer-target-box {
             pointer-events: auto;
+            display: block;
         }
 
-        /* Toggle Master Button styling */
-        .toggle-master-btn {
-            background: #e512c9;
-            color: white;
-            border: none;
-            height: 44px;
-            padding: 0 14px;
-            border-radius: 22px;
-            font-weight: bold;
-            font-size: 14px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            white-space: nowrap;
-        }
-
-        /* Overriding Layer Switcher Default Position to fit inside top action group cleanly */
+        /* Enforce Layer Switcher Button Style & Alignment */
         .ol-layerswitcher {
             position: static !important;
         }
         .ol-layerswitcher button {
-            width: 44px !important;
-            height: 44px !important;
-            background-size: 20px !important;
+            width: 46px !important;
+            height: 46px !important;
             border-radius: 50% !important;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2) !important;
+            background-color: #ffffff !important;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15) !important;
         }
         .ol-layerswitcher .panel {
             position: absolute;
             top: 65px;
             right: 12px;
-            max-height: 75vh;
+            max-height: 70vh;
+            width: 240px;
             overflow-y: auto;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            padding: 10px;
         }
 
-        /* Left Side Tools Panel (Hidden by default) */
+        /* Left Side Tools Panel - Static, Visible, Easy for thumb reach */
         .custom-panel-left {
             position: absolute;
-            bottom: 25px;
-            left: 15px;
+            top: 80px; /* Placed below search bar safely */
+            left: 12px;
             z-index: 9999;
-            display: none; 
+            display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 10px;
         }
 
         .custom-btn {
             background: #ffffff;
-            border: none;
+            border: 1px solid #ddd;
             cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-            width: 48px !important;
-            height: 48px !important;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            width: 46px !important;
+            height: 46px !important;
             font-size: 18px !important;
             border-radius: 50% !important;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: transform 0.2s;
+            transition: background 0.2s;
         }
 
         .custom-btn:active {
-            transform: scale(0.9);
             background: #f0f0f0;
         }
 
-        /* Bottom Sheet Box for Info */
+        /* Bottom Info Popup Box for Click/Search results */
         #layerInfo {
             position: absolute;
-            bottom: 25px;
-            right: 15px;
+            bottom: 20px;
+            left: 12px;
+            right: 12px;
             z-index: 9998;
             background: #ffffff;
             padding: 15px;
-            border-radius: 16px;
-            width: 80%;
-            max-width: 280px;
-            max-height: 200px;
+            border-radius: 14px;
+            max-height: 180px;
             overflow-y: auto;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            box-shadow: 0 -2px 15px rgba(0,0,0,0.15);
             display: none;
-            border: 1px solid #eaeaea;
+            border: 1px solid #eee;
         }
 
         #layerInfo h4 {
-            margin: 0 0 8px 0;
+            margin: 0 0 6px 0;
             color: #333;
             font-size: 15px;
-            border-bottom: 2px solid #f0f0f0;
-            padding-bottom: 5px;
+            border-bottom: 2px solid #f5f5f5;
+            padding-bottom: 4px;
         }
 
         #layerInfo .info-item {
             font-size: 13px;
-            margin-bottom: 5px;
-            line-height: 1.4;
-            color: #555;
+            margin-bottom: 4px;
+            color: #444;
         }
 
         .close-card {
             float: right;
             cursor: pointer;
-            font-size: 15px;
-            color: #999;
+            font-size: 16px;
+            color: #aaa;
         }
         </style>
         <title></title>
     </head>
     <body>
         
-        <div class="top-header-container">
-            <div class="search-container" id="searchBarContainer">
-                <input type="text" id="surveySearch" placeholder="🔍 Search Survey...">
+        <div class="top-header-layout">
+            <div class="search-container">
+                <input type="text" id="surveySearch" placeholder="🔍 Search Survey Number...">
             </div>
-
-            <div class="top-right-actions">
-                <button class="toggle-master-btn" id="toggleToolsBtn">🛠 Tools</button>
-                <div id="layerSwitcherTarget"></div> </div>
+            <div class="layer-target-box" id="layerSwitcherTarget"></div>
         </div>
 
-        <div class="custom-panel-left" id="leftToolsPanel">
+        <div class="custom-panel-left">
             <button class="custom-btn" id="gpsBtn" title="My Location">📍</button>
             <button class="custom-btn" id="directionBtn" title="Get Directions">🧭</button>
-            <button class="custom-btn" id="uploadBtn" title="Upload File">⬆</button>
-            <button class="custom-btn" id="downloadBtn" title="Download Location">⬇</button>
+            <button class="custom-btn" id="uploadBtn" title="Upload KML/GeoJSON">⬆</button>
+            <button class="custom-btn" id="downloadBtn" title="Download Center">⬇</button>
         </div>
 
         <input type="file" id="fileInput" accept=".kml,.geojson,.json" style="display:none">
@@ -235,7 +213,7 @@
         <script src="https://cdn.jsdelivr.net/npm/@tmcw/togeojson@5.8.1/dist/togeojson.umd.js"></script>
 
 <script>
-// Moving Layer Switcher inside our custom top right action container dynamically
+// Force LayerSwitcher to render perfectly inside our layout box on right side
 map.getControls().forEach(function(control) {
     if (control instanceof ol.control.LayerSwitcher || (control.constructor && control.constructor.name === 'LayerSwitcher')) {
         map.removeControl(control);
@@ -249,23 +227,6 @@ var layerSwitcher = new ol.control.LayerSwitcher({
 });
 map.addControl(layerSwitcher);
 
-// Toggle Tools Master Button (Default: Hidden)
-let toolsVisible = false;
-document.getElementById('toggleToolsBtn').onclick = function(){
-    toolsVisible = !toolsVisible;
-    if(toolsVisible){
-        document.getElementById('leftToolsPanel').style.display = 'flex';
-        document.getElementById('searchBarContainer').style.display = 'block';
-        this.style.background = "#333333";
-        this.innerText = "✕ Close";
-    } else {
-        document.getElementById('leftToolsPanel').style.display = 'none';
-        document.getElementById('searchBarContainer').style.display = 'none';
-        this.style.background = "#e512c9";
-        this.innerText = "🛠 Tools";
-    }
-};
-
 let gpsEnabled = false;
 let gpsLayer = null;
 
@@ -277,15 +238,11 @@ document.getElementById('gpsBtn').onclick = function(){
                 pos.coords.latitude
             ]);
 
-            if(gpsLayer){
-                map.removeLayer(gpsLayer);
-            }
+            if(gpsLayer){ map.removeLayer(gpsLayer); }
 
             gpsLayer = new ol.layer.Vector({
                 source:new ol.source.Vector({
-                    features:[
-                        new ol.Feature({ geometry:new ol.geom.Point(coords) })
-                    ]
+                    features:[ new ol.Feature({ geometry:new ol.geom.Point(coords) }) ]
                 })
             });
 
@@ -309,7 +266,7 @@ document.getElementById('directionBtn').onclick = function(){
         let url = 'https://www.google.com/maps/dir/?api=1&destination=' + coord[1] + ',' + coord[0];
         window.open(url, '_blank');
     });
-    alert('Click anywhere on the map to get directions.');
+    alert('Click anywhere on the map to open directions.');
 };
 
 document.getElementById('uploadBtn').onclick = function(){
@@ -361,7 +318,7 @@ document.getElementById('downloadBtn').onclick = function(){
     a.click();
 };
 
-// Survey Search Logic with High Zoom (maxZoom: 22)
+// Survey Search and Micro-Zoom View
 document.getElementById('surveySearch').addEventListener('keypress', function(e){
     if(e.key === 'Enter'){
         let value = this.value.toLowerCase().trim();
@@ -391,7 +348,7 @@ document.getElementById('surveySearch').addEventListener('keypress', function(e)
     }
 });
 
-// Map Click Info Logic
+// Click Map Event to extract property values
 map.on('singleclick', function(evt){
     let propsFound = null;
     map.forEachFeatureAtPixel(evt.pixel, function(feature){
