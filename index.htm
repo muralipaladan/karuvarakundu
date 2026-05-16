@@ -11,143 +11,180 @@
         <link href="resources/photon-geocoder-autocomplete.min.css" rel="stylesheet">
         <link rel="stylesheet" href="./resources/ol-layerswitcher.css">
         <link rel="stylesheet" href="./resources/qgis2web.css">
-        <style>
-        html, body {
-            background-color: #ffffff;
-        }
-        .ol-control > * {
-            background-color: #f8f8f8!important;
-            color: #e512c9!important;
-            border-radius: 0px;
-        }
-        .ol-attribution a, .gcd-gl-input::placeholder, .search-layer-input-search::placeholder {
-            color: #e512c9!important;
-        }
-        .search-layer-input-search {
-            background-color: #f8f8f8!important;
-        }
-        .ol-control > *:focus, .ol-control >*:hover {
-            background-color: rgba(248, 248, 248, 0.7)!important;
-        } 
-        .ol-control {
-            background-color: rgba(255,255,255,.4) !important;
-            padding: 2px !important;
-        } 
-        </style>
-
+        
         <style>
         html, body, #map {
             width: 100%;
             height: 100%;
             padding: 0;
             margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #ffffff;
+            overflow: hidden;
+        }
+
+        /* OpenLayers Standard Controls Styling */
+        .ol-control > * {
+            background-color: #ffffff !important;
+            color: #333333 !important;
+            border-radius: 8px !important;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2) !important;
+        }
+        .ol-control {
+            background-color: transparent !important;
+            padding: 0 !important;
+        }
+
+        /* Search Bar Layout - Top Centered & Floating */
+        .search-container {
+            position: absolute;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9999;
+            width: 90%;
+            max-width: 400px;
+        }
+
+        #surveySearch {
+            width: 100%;
+            padding: 14px 20px;
+            border-radius: 25px;
+            border: none;
+            font-size: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            outline: none;
+            box-sizing: border-box;
+            background: #ffffff;
+        }
+
+        /* Bottom Control Panel for Mobile Ergonomics */
+        .custom-panel {
+            position: absolute;
+            bottom: 25px;
+            right: 15px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .custom-btn {
+            background: #ffffff;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            width: 50px !important;
+            height: 50px !important;
+            font-size: 20px !important;
+            border-radius: 50% !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s;
+        }
+
+        .custom-btn:active {
+            transform: scale(0.9);
+            background: #f0f0f0;
+        }
+
+        /* Elegant Bottom Sheet for Layer/Survey Info */
+        #layerInfo {
+            position: absolute;
+            bottom: 25px;
+            left: 15px;
+            z-index: 9998;
+            background: #ffffff;
+            padding: 15px;
+            border-radius: 16px;
+            width: 85%;
+            max-width: 320px;
+            max-height: 250px;
+            overflow-y: auto;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            display: none;
+            border: 1px solid #eaeaea;
+        }
+
+        #layerInfo h4 {
+            margin: 0 0 8px 0;
+            color: #333;
+            font-size: 16px;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 5px;
+        }
+
+        #layerInfo .info-item {
+            font-size: 14px;
+            margin-bottom: 6px;
+            line-height: 1.4;
+            color: #555;
+        }
+
+        /* Close button for Info Card */
+        .close-card {
+            float: right;
+            cursor: pointer;
+            font-size: 16px;
+            color: #999;
         }
         </style>
         <title></title>
-    
-<style>
-/* Mobile Friendly */
-.ol-control button,
-.layer-switcher button,
-.custom-btn {
-    width: 52px !important;
-    height: 52px !important;
-    font-size: 22px !important;
-    border-radius: 10px !important;
-}
-
-.custom-panel {
-    position:absolute;
-    top:10px;
-    right:10px;
-    z-index:9999;
-    display:flex;
-    flex-direction:column;
-    gap:10px;
-}
-
-.custom-btn {
-    background:#fff;
-    border:1px solid #999;
-    cursor:pointer;
-    box-shadow:0 2px 6px rgba(0,0,0,0.3);
-}
-
-#surveySearch {
-    position:absolute;
-    top:10px;
-    left:70px;
-    z-index:9999;
-    width:220px;
-    padding:12px;
-    border-radius:10px;
-    border:1px solid #999;
-    font-size:16px;
-}
-
-#layerInfo {
-    position:absolute;
-    bottom:10px;
-    left:10px;
-    z-index:9999;
-    background:#fff;
-    padding:10px;
-    border-radius:10px;
-    max-width:250px;
-    display:none;
-}
-</style>
-
-</head>
+    </head>
     <body>
         
-<input type="text" id="surveySearch" placeholder="Search Survey Number">
+        <div class="search-container">
+            <input type="text" id="surveySearch" placeholder="🔍 Search Survey Number...">
+        </div>
 
-<div class="custom-panel">
-<button class="custom-btn" id="gpsBtn">📍</button>
-<button class="custom-btn" id="directionBtn">🧭</button>
-<button class="custom-btn" id="uploadBtn">⬆</button>
-<button class="custom-btn" id="downloadBtn">⬇</button>
-<button class="custom-btn" id="toggleToolsBtn">🛠</button>
-</div>
+        <div class="custom-panel">
+            <button class="custom-btn" id="gpsBtn" title="My Location">📍</button>
+            <button class="custom-btn" id="directionBtn" title="Get Directions">🧭</button>
+            <button class="custom-btn" id="uploadBtn" title="Upload File">⬆</button>
+            <button class="custom-btn" id="downloadBtn" title="Download Location">⬇</button>
+            <button class="custom-btn" id="toggleToolsBtn" title="Toggle Tools">🛠</button>
+        </div>
 
-<input type="file" id="fileInput" accept=".kml,.geojson,.json" style="display:none">
+        <input type="file" id="fileInput" accept=".kml,.geojson,.json" style="display:none">
 
-<div id="layerInfo"></div>
+        <div id="layerInfo">
+            <span class="close-card" onclick="document.getElementById('layerInfo').style.display='none'">✕</span>
+            <h4>Information</h4>
+            <div id="layerInfoContent"></div>
+        </div>
 
-<div id="map">
+        <div id="map">
             <div id="popup" class="ol-popup">
                 <a href="#" id="popup-closer" class="ol-popup-closer"></a>
                 <div id="popup-content"></div>
             </div>
         </div>
+
         <script src="resources/qgis2web_expressions.js"></script>
-<script src="resources/proj4.js"></script>
+        <script src="resources/proj4.js"></script>
         <script>proj4.defs('EPSG:3857','+proj=merc +a=6378137 +b=6378137 +lat_ts=0 +lon_0=0 +x_0=0 +y_0=0 +k=1 +units=m +nadgrids=@null +wktext +no_defs');</script>
         <script src="./resources/functions.js"></script>
         <script src="./resources/ol.js"></script>
         <script src="./resources/ol-layerswitcher.js"></script>
         <script src="resources/photon-geocoder-autocomplete.min.js"></script>
         <script src="resources/olms.js"></script>
-        <script src="layers/VillageBoundary_3.js"></script><script src="layers/Surveyline_4.js"></script>
-        <script src="styles/VillageBoundary_3_style.js"></script><script src="styles/Surveyline_4_style.js"></script>
+        <script src="layers/VillageBoundary_3.js"></script>
+        <script src="layers/Surveyline_4.js"></script>
+        <script src="styles/VillageBoundary_3_style.js"></script>
+        <script src="styles/Surveyline_4_style.js"></script>
         <script src="./layers/layers.js" type="text/javascript"></script> 
         <script src="./resources/Autolinker.min.js"></script>
         <script src="./resources/qgis2web.js"></script>        
-    
-<script src="https://cdn.jsdelivr.net/npm/@tmcw/togeojson@5.8.1/dist/togeojson.umd.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@tmcw/togeojson@5.8.1/dist/togeojson.umd.js"></script>
 
 <script>
-
 let gpsEnabled = false;
 let gpsLayer = null;
 
 document.getElementById('gpsBtn').onclick = function(){
-
     if(!gpsEnabled){
-
         navigator.geolocation.watchPosition(function(pos){
-
             let coords = ol.proj.fromLonLat([
                 pos.coords.longitude,
                 pos.coords.latitude
@@ -168,40 +205,31 @@ document.getElementById('gpsBtn').onclick = function(){
             });
 
             map.addLayer(gpsLayer);
-
             map.getView().animate({
                 center:coords,
                 zoom:18
             });
-
         });
-
         gpsEnabled = true;
-
+        this.style.background = "#e512c9";
+        this.style.color = "#fff";
     } else {
-
         if(gpsLayer){
             map.removeLayer(gpsLayer);
         }
-
         gpsEnabled = false;
+        this.style.background = "#ffffff";
+        this.style.color = "#333";
     }
 };
 
 document.getElementById('directionBtn').onclick = function(){
-
     map.once('click', function(evt){
-
         let coord = ol.proj.toLonLat(evt.coordinate);
-
-        let url =
-            'https://www.google.com/maps/dir/?api=1&destination=' +
-            coord[1] + ',' + coord[0];
-
+        let url = 'https://www.google.com/maps/search/?api=1&query=' + coord[1] + ',' + coord[0];
         window.open(url, '_blank');
     });
-
-    alert('Click map for direction');
+    alert('Click anywhere on the map to get directions to that point.');
 };
 
 document.getElementById('uploadBtn').onclick = function(){
@@ -209,141 +237,82 @@ document.getElementById('uploadBtn').onclick = function(){
 };
 
 document.getElementById('fileInput').addEventListener('change', function(e){
-
     let file = e.target.files[0];
-
     if(!file) return;
-
     let reader = new FileReader();
 
     reader.onload = function(evt){
-
         let text = evt.target.result;
+        let features;
 
         if(file.name.endsWith('.geojson') || file.name.endsWith('.json')){
-
-            let features = new ol.format.GeoJSON().readFeatures(text, {
+            features = new ol.format.GeoJSON().readFeatures(text, {
                 featureProjection:'EPSG:3857'
             });
-
-            let source = new ol.source.Vector({
-                features:features
+        } else if(file.name.endsWith('.kml')){
+            let parser = new DOMParser();
+            let kml = parser.parseFromString(text, 'text/xml');
+            let geojson = toGeoJSON.kml(kml);
+            features = new ol.format.GeoJSON().readFeatures(geojson, {
+                featureProjection:'EPSG:3857'
             });
-
-            let layer = new ol.layer.Vector({
-                source:source
-            });
-
-            map.addLayer(layer);
-
-            map.getView().fit(source.getExtent());
         }
 
-        if(file.name.endsWith('.kml')){
-
-            let parser = new DOMParser();
-
-            let kml = parser.parseFromString(text, 'text/xml');
-
-            let geojson = toGeoJSON.kml(kml);
-
-            let features = new ol.format.GeoJSON().readFeatures(geojson, {
-                featureProjection:'EPSG:3857'
-            });
-
-            let source = new ol.source.Vector({
-                features:features
-            });
-
-            let layer = new ol.layer.Vector({
-                source:source
-            });
-
+        if(features && features.length > 0) {
+            let source = new ol.source.Vector({ features: features });
+            let layer = new ol.layer.Vector({ source: source });
             map.addLayer(layer);
-
-            map.getView().fit(source.getExtent());
+            map.getView().fit(source.getExtent(), { padding: [50, 50, 50, 50], duration: 1000 });
         }
     };
-
     reader.readAsText(file);
 });
 
 document.getElementById('downloadBtn').onclick = function(){
-
     let center = ol.proj.toLonLat(map.getView().getCenter());
-
     let geojson = {
         type:'FeatureCollection',
         features:[{
             type:'Feature',
-            geometry:{
-                type:'Point',
-                coordinates:center
-            },
-            properties:{
-                name:'Map Center'
-            }
+            geometry:{ type:'Point', coordinates:center },
+            properties:{ name:'Map Center' }
         }]
     };
-
-    let data =
-        'data:text/json;charset=utf-8,' +
-        encodeURIComponent(JSON.stringify(geojson));
-
+    let data = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(geojson));
     let a = document.createElement('a');
-
     a.href = data;
     a.download = 'map_location.geojson';
-
     a.click();
 };
 
 let visible = true;
-
 document.getElementById('toggleToolsBtn').onclick = function(){
-
     let controls = document.querySelectorAll('.ol-control');
-
     controls.forEach(function(ctrl){
-
         ctrl.style.display = visible ? 'none' : 'block';
     });
-
     visible = !visible;
 };
 
+// Survey Search Logic
 document.getElementById('surveySearch').addEventListener('keypress', function(e){
-
     if(e.key === 'Enter'){
-
-        let value = this.value.toLowerCase();
-
+        let value = this.value.toLowerCase().trim();
+        if(!value) return;
         let found = false;
 
         map.getLayers().forEach(function(layer){
-
             if(layer instanceof ol.layer.Vector){
-
                 layer.getSource().getFeatures().forEach(function(feature){
-
                     let props = feature.getProperties();
-
                     for(let key in props){
-
-                        if(String(props[key]).toLowerCase().includes(value)){
-
+                        if(key !== 'geometry' && String(props[key]).toLowerCase().includes(value)){
                             map.getView().fit(
                                 feature.getGeometry().getExtent(),
-                                {maxZoom:20}
+                                { maxZoom: 19, duration: 1000 }
                             );
-
                             found = true;
-
-                            document.getElementById('layerInfo').style.display='block';
-                            document.getElementById('layerInfo').innerHTML =
-                                '<b>Survey Result</b><br>' +
-                                JSON.stringify(props);
-
+                            showInfoCard('Survey Search Result', props);
                             break;
                         }
                     }
@@ -357,29 +326,32 @@ document.getElementById('surveySearch').addEventListener('keypress', function(e)
     }
 });
 
+// Map Click Logic
 map.on('singleclick', function(evt){
-
-    let info = '';
-
+    let propsFound = null;
     map.forEachFeatureAtPixel(evt.pixel, function(feature){
-
-        let props = feature.getProperties();
-
-        for(let key in props){
-
-            if(key !== 'geometry'){
-                info += '<b>' + key + ':</b> ' + props[key] + '<br>';
-            }
-        }
+        propsFound = feature.getProperties();
     });
 
-    if(info !== ''){
-        document.getElementById('layerInfo').style.display='block';
-        document.getElementById('layerInfo').innerHTML = info;
+    if(propsFound){
+        showInfoCard('Layer Details', propsFound);
     }
 });
 
+// Function to format and show info nicely
+function showInfoCard(title, properties) {
+    let infoHtml = '';
+    for(let key in properties){
+        if(key !== 'geometry'){
+            infoHtml += `<div class="info-item"><b>${key}:</b> ${properties[key]}</div>`;
+        }
+    }
+    if(infoHtml !== ''){
+        document.getElementById('layerInfo').style.display = 'block';
+        document.getElementById('layerInfo').querySelector('h4').innerText = title;
+        document.getElementById('layerInfoContent').innerHTML = infoHtml;
+    }
+}
 </script>
-
 </body>
 </html>
